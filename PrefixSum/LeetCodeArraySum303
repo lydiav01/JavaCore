@@ -1,0 +1,31 @@
+package io.javabrains;
+
+public class LeetCodeArraySum303 {
+
+	private int[] sumArray;
+	int result = 0;
+
+	public LeetCodeArraySum303(int[] nums) {
+		sumArray = new int[nums.length];
+		int tempVal = 0;
+		for (int i = 0; i < nums.length; i++) {
+			sumArray[i] = tempVal + nums[i];
+			tempVal = sumArray[i];
+			//System.out.println(sumArray[i]);
+		}
+
+	}
+
+	public int sumRange(int left, int right) {
+		
+		if(left > 0)
+      
+		result = sumArray[right] - sumArray[left - 1];
+		else 
+			result = sumArray[right];
+		System.out.println(result);
+		return result;
+
+	}
+
+}

@@ -1,0 +1,23 @@
+public class LeetCodeNextGreatest496 {
+
+	public int[] nextGreaterElement(int[] nums1, int[] nums2) {
+		Stack<Integer> stack = new Stack<>();
+		int[] result = new int[nums1.length];
+
+		Map<Integer, Integer> hm = new HashMap<Integer, Integer>();
+
+		for (int num : nums2) {
+			while (!stack.isEmpty() && num > stack.peek())
+				hm.put(stack.pop(), num);
+			stack.push(num);
+
+		}
+		int i = 0;
+		for (int num : nums1) {
+            result[i++] = hm.getOrDefault(num, -1);
+			
+		}
+		return result;
+
+	}
+}

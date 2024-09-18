@@ -1,0 +1,40 @@
+package io.javabrains;
+
+import java.util.HashMap;
+
+public class LeetCodeValidAnagram242 {
+
+	public boolean isAnagram(String s, String t) {
+
+		HashMap<Character, Integer> map = new HashMap<Character, Integer>();
+		int i = 1;
+		for (char c : s.toCharArray()) {
+
+			if (!map.containsKey(c))
+				map.put(c, i);
+			else
+				map.put(c, map.get(c) + 1);
+
+		}
+		for (char c : t.toCharArray()) {
+			if (map.containsKey(c)) {
+				if (map.get(c) == 1)
+					map.remove(c);
+				else {
+					map.put(c, map.get(c) - 1);
+				}
+
+			} else
+				return false;
+		}
+
+		if (map.isEmpty()) {
+
+			return true;
+		}
+
+		return false;
+
+	}
+
+}

@@ -1,0 +1,168 @@
+package CoreConcepts;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import javax.net.ssl.HttpsURLConnection;
+
+import com.google.gson.Gson;
+
+public class RestAPIMatchesDrawn {
+
+	/*
+	 * Complete the 'getNumDraws' function below.
+	 *
+	 * The function is expected to return an INTEGER. The function accepts INTEGER
+	 * year as parameter.
+	 */
+
+	public static int getNumDraws(int year) throws MalformedURLException, IOException {
+
+		// Applying condition
+		String baseUrl = "https://jsonmock.hackerrank.com/api";
+
+		int count = 0;
+
+		count = (int) invokeAPI(baseUrl, "/football_matches?year=%d&page=%s", Response.class)
+				.filter(data -> data.team1goals.equals(data.team2goals)).count();
+		System.out.println(count);
+
+		return count;
+
+	}
+
+	// Handling Pagination
+
+	public static Stream<Data> invokeAPI(String baseUrl, final String url, final Class<? extends Response> clazz)
+			throws IOException {
+
+		final Response firstPageResponse = invoke(String.format(baseUrl + url,2011, 1), clazz);
+		Stream<Data> d = Stream
+				.concat(Stream.of(firstPageResponse),
+						IntStream.rangeClosed(2, firstPageResponse.getTotalPages())
+						          .parallel()
+								.mapToObj(i -> String.format(baseUrl + url,2011, i))
+								.map(uri -> invoke(uri, clazz)))
+				.map(Response::getData).flatMap(List::stream);
+
+		return d;
+
+	}
+
+	// Hitting API
+	public static Response invoke(String url, Class<? extends Response> clazz) {
+
+		final Gson gson = new Gson();
+		final String finalUrl = url.replace(" ", "%20");
+		final StringBuilder responseBuilder = new StringBuilder();
+		try {
+			final HttpsURLConnection connection = (HttpsURLConnection) new URL(finalUrl).openConnection();
+			connection.getResponseCode();
+			try (BufferedReader bufferedReader = new BufferedReader(
+					new InputStreamReader(connection.getInputStream()))) {
+				String l;
+				while ((l = bufferedReader.readLine()) != null)
+					responseBuilder.append(l);
+			}
+			connection.disconnect();
+		} catch (final Exception ex) {
+			ex.printStackTrace();
+		}
+		return gson.fromJson(responseBuilder.toString(), clazz);
+	}
+
+}
+
+class Response {
+	private int page;
+	private int per_page;
+	private int total;
+	private int total_pages;
+
+	private List<Data> data;
+
+	public int page() {
+		return page;
+	}
+
+	public int per_page() {
+		return per_page;
+	}
+
+	public int total() {
+		return total;
+	}
+
+	public int getTotalPages() {
+		return total_pages;
+	}
+
+	public List<Data> getData() {
+		return data;
+	}
+
+}
+
+class Data {
+	String competition;
+	int year;
+	String round;
+	String team1;
+	String team2;
+	String team1goals;
+	String team2goals;
+
+	public String getCompetition() {
+		return competition;
+	}
+
+	public int getYear() {
+		return year;
+	}
+
+	public String getRound() {
+		return round;
+	}
+
+	public String getTeam1() {
+		return team1;
+	}
+
+	public String getTeam2() {
+		return team2;
+	}
+
+	public String getTeam1goals() {
+		return team1goals;
+	}
+
+	public String getTeam2goals() {
+		return team2goals;
+	}
+
+}
+
+/*public class Webservice {
+	public static void main(String[] args) throws IOException {
+		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+		BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(System.getenv("OUTPUT_PATH")));
+
+		int year = Integer.parseInt(bufferedReader.readLine().trim());
+
+		int result = Result1.getNumDraws(year);
+
+		bufferedWriter.write(String.valueOf(result));
+		bufferedWriter.newLine();
+
+		bufferedReader.close();
+		bufferedWriter.close();
+	}
+}*/
